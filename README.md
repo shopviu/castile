@@ -1,5 +1,13 @@
 # Castile VIU Fork
 
+# TODO VIU - LS eCommerce
+
+- [X] Transform types the correct way: now = `:"P:Login"` expected: `:login`
+- [X] Create a correct envelop
+- [X] Soap UI Mock server accepts envelop and returns valid response.
+- [ ] Parse XML response from mock server
+
+
 Castile is a modern Elixir SOAP API client.
 It borrows ideas heavily from [Detergent](https://github.com/devinus/detergent)/yaws.
 
@@ -41,10 +49,6 @@ Docs can be found at [https://hexdocs.pm/castile](https://hexdocs.pm/castile).
 # It's recommended to do init_model at compile time, as an @attr
 @model = Castile.init_model("CountryInfoService.wsdl")
 
-# we take maps as input and return binaries
-{:ok, resp} = Castile.call(@model, :CountryISOCode, %{sCountryName: "Netherlands"})
-# "NL"
-
 # More complex results get cast into maps:
 model = Castile.init_model("BLZService.wsdl")
 {:ok, resp} = Castile.call(model, :getBank, %{blz: "70070010"})
@@ -54,6 +58,46 @@ model = Castile.init_model("BLZService.wsdl")
 #   ort: "München",
 #   plz: "80271"
 # }
+```
+
+## LS eCommerce SOAP
+
+### Overwrite the default erlsom prefix
+Castile uses Erlang's `erlsom` lib to parse xml files. Somehow `erlosm` adds a default prefix `P:` to the types. LS eCommerce SOAP expects a `ser:` prefix.
+
+To overwrite the default prefix you need to add a config variable.
+
+In your `config.exs` file, add:
+```Elixir
+config :castile, overwrite_prefix: :ser
+```
+
+**Namespaces**
+
+Castile will add multiple namespaces but at the end we need only one `xmlns:ser="http://lsretail.com/LSOmniService/EComm/2017/Service"`.
+
+To overwrite the logic we can add the namespace manually:
+```Elixir
+config :castile, overwrite_namespace: "http://lsretail.com/LSOmniService/EComm/2017/Service"
+```
+
+
+**Envelope**
+
+To have an `ser:` prefix yo ne
+
+Looks like:
+```xml
+      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <ser:Login xmlns:ser="http://lsretail.com/LSOmniService/EComm/2017/Service">
+              <ser:userName>tom</ser:userName>
+              <ser:password>tom.1</ser:password>
+              <ser:deviceId></ser:deviceId>
+            </ser:Login>
+        </soapenv:Body>
+      </soapenv:Envelope>
 ```
 
 # TODO

@@ -1,4 +1,4 @@
-defmodule Castile.Erlsom do
+defmodule Castile.Records.Erlsom do
   @moduledoc """
   Erlsom parser records. Used for processing erlsom XSD metadata.
   """
@@ -15,6 +15,6 @@ defmodule Castile.Erlsom do
   defrecord :attr, :att, [:name, :nr, :opt, :tp]
 
   # erlsom internals
-  defrecord :ns, [:uri, :prefix]
+  defrecord :ns, [:uri, :prefix, :element_form_default]
   defrecord :qname, [:uri, :local_part, :prefix, :mapped_prefix]
 end
